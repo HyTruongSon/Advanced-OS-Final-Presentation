@@ -1,0 +1,5 @@
+\beamer@endinputifotherversion {3.36pt}
+\beamer@sectionintoc {1}{Chapter I: Introduction}{3}{0}{1}
+\beamer@sectionintoc {2}{Chapter II: State-of-the-art Algorithms}{9}{0}{2}
+\beamer@sectionintoc {3}{Chapter III: Experiments and Results}{14}{0}{3}
+\beamer@sectionintoc {4}{Chapter IV: Conclusion and Future Research}{19}{0}{4}
