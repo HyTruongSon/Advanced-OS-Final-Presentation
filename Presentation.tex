@@ -1,6 +1,6 @@
 \documentclass{beamer}
 \usepackage[utf8]{inputenc}
-\usepackage{utopia}
+\usepackage{fourier}
 
 \usepackage{amsfonts}
 \usepackage{amsmath}		
@@ -18,6 +18,7 @@
 \usepackage{ragged2e}
 
 \usetheme{Madrid}
+\usefonttheme{serif}
 \usecolortheme{default}
 
 \title[Graph Neural Networks]{Graph Neural Networks \\ Efficient Tensor Operations In CUDA/GPU \\ Custom Deep Learning Framework In C++ \\ Applications In Quantum Chemistry}
@@ -45,14 +46,50 @@ Covariant Compositional Networks For Learning Graphs (ICLR 2018)
 
 \begin{frame}
 \frametitle{What are Graph Neural Networks?}
+\begin{block}{Learning images, texts}
+In general, traditional neural networks (Convolutional Neural Networks, Recurrent Neural Networks, etc.) take the inputs as \textbf{fixed-size} vectors, matrices and tensors. The architecture of the neural network is always \textbf{fixed}.
+\end{block}
+\begin{alertblock}{Learning graphs, molecules}
+A graph neural network can be defined as a neural network that takes inputs from graphs with \textbf{various} sizes and structures. The architecture of the neural network is always \textbf{dynamic}.
+\end{alertblock}
 \end{frame}
 
 \begin{frame}
 \frametitle{What are Tensor Operations?}
+Basic tensors:
+\begin{itemize}
+	\item 1D Tensor: Vectors
+	\item 2D Tensor: Matrices
+	\item 3D Tensor: Cubes
+\end{itemize}
+What we are dealing with: {\color{red} 6D Tensors}. We need the \textbf{tensor contraction} operation $C$ to reduce from the \textbf{high-order} into a \textbf{low-order}:
+$$C: \Re^{d \times d \times d \times d \times d \times c} \rightarrow \Re^{d \times d \times c}$$
 \end{frame}
 
 \begin{frame}
-\frametitle{What is a Deep Learning framework?}
+\frametitle{What is GraphFlow framework?}
+We write our own Deep Learning framework name {\color{red} GraphFlow} in C++ and CUDA to construct arbitrary neural networks that supports symbolic differentiation and dynamic computation graphs. 
+\begin{itemize}
+	\item Number of lines of C++ codes: $\sim 55,000$
+	\item Total (including generated codes): $\sim 274,000$
+	\item Done in this quarter for parallelization: {\color{red} $\sim 10,000$}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Why not TensorFlow or PyTorch?}
+\begin{block}{TensorFlow's disadvantage}
+No (direct) support for dynamic computation graphs.
+\end{block}
+\begin{block}{PyTorch's disadvantage}
+No support for tensor contractions.
+\end{block}
+\begin{alertblock}{GraphFlow's advantage}
+	\begin{itemize}
+		\item Support dynamic computation graphs
+		\item Support tensor contractions
+	\end{itemize}
+\end{alertblock}
 \end{frame}
 
 \begin{frame}
@@ -84,15 +121,49 @@ C18H9N3OSSe \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Adjacency matrix
 \section{Chapter II: State-of-the-art Algorithms}
 
 \begin{frame}
-\frametitle{Covariant Neural Networks}
+\frametitle{Covariant (Graph) Neural Networks - Part 1}
+Input graph $G = (V, E)$. Receptive field of vertex $v \in V$ at level $l = 0$ of the network: $\Omega_0(v) = \{v\}$. Receptive field of the vertex at level $l > 0$:
+$$\Omega_l(v) = \Omega_{l - 1}(v) \cup \bigcup\limits_{w \in B(v, 1)} \Omega_{l - 1}(w)$$
+High-order representation of vertex $v$ at level $l$:
+$$f_l(v) \in \Re^{|\Omega_l(v)| \times |\Omega_l(v)| \times C}$$
+where $C$ is the number of channels. We will learn the vertex representation by our graph neural networks with back-propagation. The representation has to be \textbf{permutation - invariant}.
 \end{frame}
 
 \begin{frame}
-\frametitle{Tensor Contractions}
+\frametitle{Covariant (Graph) Neural Networks - Part 2}
+$$f_l(v) = \sigma \bigg( b_l + W_l \otimes \phi \bigg\{ \bigcup\limits_{w \in B(v, 1)} f_{l - 1}(w) \bigg\} \bigg)$$
+where:
+\begin{itemize}
+	\item $\sigma$ is the Leaky ReLU activation function
+	\item $b_l \in \Re^{1 \times 1 \times C}$ is the learnable bias
+	\item $W_l \in \Re^{C \times (K \cdot C)}$ is the learnable weight matrix
+	\item $C$ is the number of channels, $K$ is number of contractions
+	\item $\otimes$ is the broad-casting matrix-tensor multiplication
+	\item $f_{l - 1}(w) \in \Re^{|\Omega_{l - 1}(w)| \times |\Omega_{l - 1}(w)| \times C}$ is the vertex $w$ representation at level $l - 1$
+	\item $\phi\{.\}$ is the combination of tensor product and tensor contraction operations of a set of high-order vertex representations
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Tensor Product and Tensor Contractions}
+$$\phi \bigg\{ \bigcup\limits_{w \in B(v, 1)} f_{l - 1}(w) \bigg\}$$
+can be expressed as:
+\begin{itemize}
+	\item We stack the set of 3D tensors $\{f_{l - 1}(w)\}$ into a 4D tensor $g_l(v)$
+	\item We make the tensor product between $g_l(v)$ and the reduced adjacency matrix $A_{\Omega_l(v)}$ into a 6D tensor $h_l(v)$
+	\item From the 6D tensor $h_l(v)$, we do the contraction to reduce to a 3D tensor $\phi_l(v)$
+\end{itemize}
+By combinatorics, there are exactly $K = 18$ unique ways of tensor contractions.
 \end{frame}
 
 \begin{frame}
 \frametitle{Virtual Indexing System}
+\begin{alertblock}{Huge tensor}
+We cannot store a huge tensor $\Re^{|\Omega_l(v)| \times |\Omega_l(v)| \times |\Omega_l(v)| \times |\Omega_l(v)| \times |\Omega_l(v)| \times C}$ in memory explicitly.
+\end{alertblock}
+\begin{block}{Solution: Inspired from Virtual Machine}
+We will not do the tensor product and tensor contraction directly, but via a \textbf{virtual indexing system} that allows us to access the value at position $(a, b, c, d, e, f)$ efficiently.
+\end{block}
 \end{frame}
 
 \begin{frame}
@@ -111,10 +182,6 @@ C18H9N3OSSe \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Adjacency matrix
 
 \begin{frame}
 \frametitle{Performance Test: GPU Tensor Contractions}
-\end{frame}
-
-\begin{frame}
-\frametitle{Synthetic Graph Dataset}
 \end{frame}
 
 \begin{frame}
