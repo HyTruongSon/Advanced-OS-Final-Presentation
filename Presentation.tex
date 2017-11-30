@@ -41,16 +41,16 @@
 
 \begin{frame}
 \frametitle{Our publication}
-Covariant Compositional Networks For Learning Graphs (ICLR 2018)
+Covariant Compositional Networks For Learning Graphs (submitted to ICLR 2018)
 \end{frame}
 
 \begin{frame}
 \frametitle{What are Graph Neural Networks?}
 \begin{block}{Learning images, texts}
-In general, traditional neural networks (Convolutional Neural Networks, Recurrent Neural Networks, etc.) take the inputs as \textbf{fixed-size} vectors, matrices and tensors. The architecture of the neural network is always \textbf{fixed}.
+In general, traditional neural networks (Convolutional Neural Networks, Recurrent Neural Networks, etc.) take inputs as \textbf{fixed-size} vectors, matrices and tensors. The architecture of the neural network is always \textbf{fixed}.
 \end{block}
 \begin{alertblock}{Learning graphs, molecules}
-A graph neural network can be defined as a neural network that takes inputs from graphs with \textbf{various} sizes and structures. The architecture of the neural network is always \textbf{dynamic}.
+A graph neural network is a neural network that takes inputs on graphs with \textbf{various} sizes and structures. The architecture of the neural network is always \textbf{dynamic}.
 \end{alertblock}
 \end{frame}
 
@@ -63,21 +63,21 @@ Basic tensors:
 	\item 3D Tensor: Cubes
 \end{itemize}
 What we are dealing with: {\color{red} 6D Tensors}. We need the \textbf{tensor contraction} operation $C$ to reduce from the \textbf{high-order} into a \textbf{low-order}:
-$$C: \Re^{d \times d \times d \times d \times d \times c} \rightarrow \Re^{d \times d \times c}$$
+$$C: \mathbb{R}^{d \times d \times d \times d \times d \times c} \rightarrow \mathbb{R}^{d \times d \times c}$$
 \end{frame}
 
 \begin{frame}
-\frametitle{What is GraphFlow framework?}
-We write our own Deep Learning framework name {\color{red} GraphFlow} in C++ and CUDA to construct arbitrary neural networks that supports symbolic differentiation and dynamic computation graphs. 
+\frametitle{What is the GraphFlow framework?}
+We wrote our own Deep Learning framework named {\color{red} GraphFlow} in C++ and CUDA to construct arbitrary neural networks supporing symbolic differentiation and dynamic computation graphs. 
 \begin{itemize}
-	\item Number of lines of C++ codes: $\sim 55,000$
-	\item Total (including generated codes): $\sim 274,000$
-	\item Done in this quarter for parallelization: {\color{red} $\sim 10,000$}
+	\item Number of lines of C++ code: $\sim 55,000$
+%	\item Total (including generated codes): $\sim 274,000$
+	\item Number of lines written this quarter for parallelization: {\color{red} $\sim 10,000$}
 \end{itemize}
 \end{frame}
 
 \begin{frame}
-\frametitle{Why not TensorFlow or PyTorch?}
+\frametitle{Why not use TensorFlow or PyTorch?}
 \begin{block}{TensorFlow's disadvantage}
 No (direct) support for dynamic computation graphs.
 \end{block}
@@ -125,8 +125,10 @@ C18H9N3OSSe \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Adjacency matrix
 Input graph $G = (V, E)$. Receptive field of vertex $v \in V$ at level $l = 0$ of the network: $\Omega_0(v) = \{v\}$. Receptive field of the vertex at level $l > 0$:
 $$\Omega_l(v) = \Omega_{l - 1}(v) \cup \bigcup\limits_{w \in B(v, 1)} \Omega_{l - 1}(w)$$
 High-order representation of vertex $v$ at level $l$:
-$$f_l(v) \in \Re^{|\Omega_l(v)| \times |\Omega_l(v)| \times C}$$
-where $C$ is the number of channels. We will learn the vertex representation by our graph neural networks with back-propagation. The representation has to be \textbf{permutation - invariant}.
+$$f_l(v) \in \mathbb{R}^{|\Omega_l(v)| \times |\Omega_l(v)| \times C}$$
+where $C$ is the number of channels. 
+
+We learn the vertex representation by our graph neural networks via back-propagation. The representation must be \textbf{permutation - invariant}.
 \end{frame}
 
 \begin{frame}
@@ -135,11 +137,11 @@ $$f_l(v) = \sigma \bigg( b_l + W_l \otimes \phi \bigg\{ \bigcup\limits_{w \in B(
 where:
 \begin{itemize}
 	\item $\sigma$ is the Leaky ReLU activation function
-	\item $b_l \in \Re^{1 \times 1 \times C}$ is the learnable bias
-	\item $W_l \in \Re^{C \times (K \cdot C)}$ is the learnable weight matrix
+	\item $b_l \in \mathbb{R}^{1 \times 1 \times C}$ is the learnable bias
+	\item $W_l \in \mathbb{R}^{C \times (K \cdot C)}$ is the learnable weight matrix
 	\item $C$ is the number of channels, $K$ is number of contractions
 	\item $\otimes$ is the broad-casting matrix-tensor multiplication
-	\item $f_{l - 1}(w) \in \Re^{|\Omega_{l - 1}(w)| \times |\Omega_{l - 1}(w)| \times C}$ is the vertex $w$ representation at level $l - 1$
+	\item $f_{l - 1}(w) \in \mathbb{R}^{|\Omega_{l - 1}(w)| \times |\Omega_{l - 1}(w)| \times C}$ is the vertex $w$ representation at level $l - 1$
 	\item $\phi\{.\}$ is the combination of tensor product and tensor contraction operations of a set of high-order vertex representations
 \end{itemize}
 \end{frame}
@@ -159,7 +161,7 @@ By combinatorics, there are exactly $K = 18$ unique ways of tensor contractions.
 \begin{frame}
 \frametitle{Virtual Indexing System}
 \begin{alertblock}{Huge tensor}
-We cannot store a huge tensor $\Re^{|\Omega_l(v)| \times |\Omega_l(v)| \times |\Omega_l(v)| \times |\Omega_l(v)| \times |\Omega_l(v)| \times C}$ in memory explicitly.
+We cannot store a huge tensor $\mathbb{R}^{|\Omega_l(v)| \times |\Omega_l(v)| \times |\Omega_l(v)| \times |\Omega_l(v)| \times |\Omega_l(v)| \times C}$ in memory explicitly.
 \end{alertblock}
 \begin{block}{Solution: Inspired from Virtual Machine}
 We will not do the tensor product and tensor contraction directly, but via a \textbf{virtual indexing system} that allows us to access the value at position $(a, b, c, d, e, f)$ efficiently.
@@ -201,14 +203,16 @@ We will not do the tensor product and tensor contraction directly, but via a \te
 \begin{justify}
 We implemented the state-of-the-art generalized convolution operation for Graph Neural Networks in order to approximate Density Functional Theory. We obtained very promising results on the Harvard Clean Energy Project dataset.
 $$$$
-We are developing our custom Deep Learning framework in CUDA/C++ named \textbf{GraphFlow} which supports symbolic differentitation and dynamic computation graph. We expect that this framework will enable us to design more flexible, efficient Graph Neural Networks at a large scale in the future.
+We are developing our custom Deep Learning framework in CUDA/C++, \textbf{GraphFlow}, which supports symbolic differentiation and dynamic computation graph. We expect that this framework will enable us to design more flexible, efficient Graph Neural Networks at a large scale in the future.
 \end{justify}
 \end{frame}
 
 \begin{frame}
 \frametitle{Acknowledgements}
 \begin{justify}
-We would like to acknowledge my advisor Professor Risi Kondor for his valuable instructions and especially for his great ideas in generalizing convolution operations in graphs. We also want to thank other members of Machine Learning group at the University of Chicago for their dedicated support.
+We would like to acknowledge Professor Risi Kondor for his valuable instruction and especially for his ideas for generalizing convolution operations in graphs. We also want to thank other members of Machine Learning group at the University of Chicago for their dedicated support.
+$$$$
+We also want to thank Professor Shan Lu teaching the operating systems course and inspiring this project.
 $$$$
 Some of the neural network training in this paper was done using the Midway cluster at the UChicago Computing Research Center.
 \end{justify}
