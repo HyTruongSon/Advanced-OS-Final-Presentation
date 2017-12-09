@@ -1,0 +1,94 @@
+\documentclass[tikz,border=1cm]{standalone}
+\usetikzlibrary{matrix, shapes, arrows,calc, positioning}
+\usetikzlibrary{decorations.pathreplacing}
+
+\usepackage{amsmath}
+
+\begin{document}    
+%\begin{figure}
+%\begin{center}
+\tikzset{%
+%blockA/.style = {rectangle, draw, text width=6cm, align=left, rounded corners, minimum height=6.2cm,minimum width=6cm},
+%block/.style = {rectangle, draw, text width=6cm, align=left, rounded corners, minimum height=4em,minimum width=6cm},
+%line/.style = {draw, -stealth},
+wordBox/.style = {rectangle, draw, align=center, minimum height=3.5em, minimum width=4cm, text width=2cm},
+stackedBox/.style = {wordBox, node distance=0pt, outer sep=0pt},
+arrow/.style = {draw, -stealth}
+}
+
+\begin{tikzpicture}[auto]
+%\matrix[matrix, column sep=2cm, row sep=2cm] (CPU_diagram){
+\node [stackedBox] (graphBox1) {Graph 1};
+
+\node [stackedBox, below=of graphBox1] (graphBox2) {Graph 2};
+\node [stackedBox, below=of graphBox2] (graphBox3) {$\vdots$};
+\node [stackedBox, below=of graphBox3] (graphBox4) {Graph $N$};
+\node [below=of graphBox4] (MiniBatch) {\huge Mini-Batch};
+
+\node [wordBox, above right=1cm and 3cm of graphBox1] (threadBox1) {Thread 1};
+\node [wordBox, below=of threadBox1] (threadBox2) {Thread 2};
+\node [wordBox, below=of threadBox2] (threadBox3) {$\vdots$};
+\node [wordBox, below=of threadBox3] (threadBox4) {Thread 8};
+
+\node [stackedBox, below right=1cm and 3cm of threadBox1] (gradBox1) {Gradient 1};
+\node [stackedBox, below=of gradBox1] (gradBox2) {Gradient 2};
+\node [stackedBox, below=of gradBox2] (gradBox3) {$\vdots$};
+\node [stackedBox, below=of gradBox3] (gradBox4) {Gradient $N$};
+ 
+\draw[
+  decorate,
+  decoration={brace, amplitude=10pt}
+]
+  ([xshift=4pt]gradBox1.north east) -- node (gradTip) {} ([xshift=4pt]gradBox4.south east) ;
+
+\node [wordBox, right=2cm of gradTip] (SGD) {Stochastic Gradient Descent};
+
+\foreach \i in {1, 2, 3, 4}{
+    \path [arrow] (graphBox\i.east) -- (threadBox\i.west);
+    \path [arrow] (threadBox\i.east) -- (gradBox\i.west);
+}
+
+\path [arrow] (gradTip) -- (SGD.west);
+
+\end{tikzpicture}
+
+% Place nodes with matrix nodes
+% \matrix[matrix of nodes, column sep=1cm, row sep=1cm, below=1cm of CPU_diagram]{%
+%\node [blockA] (n1) {Field Tapes and observers log\\
+%(1) Pre processing\\
+%\begin{itemize}
+%\item De .... can not read
+%\item Reformatting
+%\item Editting
+%\item Geometric spreading
+%\item Setup of field Geometry
+%\item Application of field statics
+%\end{itemize}};
+%& \node [block] (n8) {DMO Correction};
+%\node [block,below=1cm of n8] (n9) {Inverse NMO Correction};
+%\node [block,below=1cm of n9] (n10) {Velocity Analysis}; \\
+%\node [block] (n2) {(2) Deconvolution and Trace };   
+%&\node [block] (n11) {NMO correction};\\
+%\node [block] (n3) {(3) cmp sorting};                 
+%& \node [block] (n12) {Deconvolution};\\
+%\node [block] (n4) {(4) velocity analysis};              
+%& \node [block] (n13) {Time-variant spectrum Whitening};   \\
+%\node [block] (n5) {(5) Residual statics corrections}; 
+%&\node [block] (n14) {Time-variant Filtering};     \\
+%\node [block] (n6) {(6) Velocity Analysis};                                          
+%& \node [block] (n15) {Migration};   \\
+%\node [block] (n7) {(7) NMO Correction};                                           
+%& \node [block] (n16) {Gain Application};\\
+%};
+%% Draw edges
+%\foreach \i/\j in {1/2,2/3,3/4,4/5,5/6,6/7}{
+%  \path [line] (n\i) -- (n\j);}
+%
+%\foreach \i/\j in {8/9,9/10,10/11,11/12,12/13,13/14,14/15,15/16}
+%    \path [line] (n\i) -- (n\j);
+%
+%\path [line] (n7.east) -- ++(0.5cm,0)coordinate(a) -- (a |- n8.north)-- ++(0,0.5cm) -| (n8.north);
+
+%\end{center}
+%\end{figure}
+\end{document}

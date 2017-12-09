@@ -1,0 +1,74 @@
+\documentclass[tikz,border=1cm]{standalone}
+\usetikzlibrary{matrix, shapes, arrows,calc, positioning}
+\usetikzlibrary{decorations.pathreplacing}
+
+\usepackage{amsmath}
+
+\begin{document}    
+%\begin{figure}
+%\begin{center}
+\tikzset{%
+%blockA/.style = {rectangle, draw, text width=6cm, align=left, rounded corners, minimum height=6.2cm,minimum width=6cm},
+%block/.style = {rectangle, draw, text width=6cm, align=left, rounded corners, minimum height=4em,minimum width=6cm},
+%line/.style = {draw, -stealth},
+wordBox/.style = {rectangle, draw, align=center, minimum height=3.5em, minimum width=4cm, text width=4cm},
+smallerBox/.style = {wordBox, minimum width=2cm},
+stackedBox/.style = {wordBox, node distance=0pt, outer sep=0pt},
+arrow/.style = {draw, -stealth}
+}
+
+\begin{tikzpicture}[auto]
+%\matrix[matrix, column sep=2cm, row sep=2cm] (CPU_diagram){
+
+\node [wordBox] (GraphFlow) {GraphFlow};
+
+\node [wordBox, right=2cm of GraphFlow] (NeuralNetworkObjects) {Neural Network Objects};
+\node [smallerBox, right=1.5cm of NeuralNetworkObjects] (CNN) {CNN};
+\node [smallerBox, above=of CNN] (LSTMGRU) {LSTM/GRU};
+\node [smallerBox, below=of CNN] (RNN) {RNN};
+\node [smallerBox, below=of RNN] (GNN) {Graph Neural Network};
+\node [smallerBox, below=of GNN] (DCG) {Dynamic Computation Graph};
+
+\path [arrow] (GraphFlow.east) -- (NeuralNetworkObjects.west);
+\path [arrow] (NeuralNetworkObjects.east) -- (LSTMGRU.west);
+\path [arrow] (NeuralNetworkObjects.east) -- (RNN.west);
+\path [arrow] (NeuralNetworkObjects.east) -- (CNN.west);
+\path [arrow] (NeuralNetworkObjects.east) -- (GNN.west);
+\path [arrow] (NeuralNetworkObjects.east) -- (DCG.west);
+
+
+\node [wordBox, below=of GraphFlow] (OptimizationAlgorithms) {Optimization Algorithms};
+\node [smallerBox, below=of OptimizationAlgorithms] (MomentumSGD) {Momentum SGD};
+\node [smallerBox, left=of MomentumSGD] (SGD) {Stochastic Gradient Descent};
+\node [smallerBox, right=of MomentumSGD] (Ada) {Adam, AdaMax, AdaDelta};
+
+\path [arrow] (GraphFlow.south) -- (OptimizationAlgorithms.north);
+\path [arrow] (OptimizationAlgorithms.south) -- (SGD.north);
+\path [arrow] (OptimizationAlgorithms.south) -- (MomentumSGD.north);
+\path [arrow] (OptimizationAlgorithms.south) -- (Ada.north);
+
+
+\node [wordBox, left=2cm of GraphFlow] (Operators) {Operators};
+\node [smallerBox, left=of Operators] (TensorContraction) {Tensor Contraction};
+\node [smallerBox, below=of TensorContraction] (Convolution) {Convolution};
+\node [smallerBox, above=of TensorContraction] (MatrixMult) {Matrix Multiplication};
+
+\path [arrow] (GraphFlow.west) -- (Operators.east);
+\path [arrow] (Operators.west) -- (TensorContraction.east);
+\path [arrow] (Operators.west) -- (Convolution.east);
+\path [arrow] (Operators.west) -- (MatrixMult.east);
+
+
+\node [wordBox, above=of GraphFlow] (DataStructures) {Data Structures};
+\node [smallerBox, above=of DataStructures] (Matrix) {Matrix};
+\node [smallerBox, left=of Matrix] (Vector) {Vector};
+\node [smallerBox, right=of Matrix] (Tensor) {Tensor};
+
+\path [arrow] (GraphFlow.north) -- (DataStructures.south);
+\path [arrow] (DataStructures.north) -- (Matrix.south);
+\path [arrow] (DataStructures.north) -- (Vector.south);
+\path [arrow] (DataStructures.north) -- (Tensor.south);
+
+\end{tikzpicture}
+
+\end{document}
